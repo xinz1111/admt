@@ -42,7 +42,6 @@ A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a dif
 |------|-------------|
 | `MT_forwardSolver.py` | Differentiable 2D MT finite-difference forward solver (`MT2DFD1` class), supporting TE/TM modes. Performs mesh construction, linear system solving, and apparent resistivity / phase computation entirely within a PyTorch computation graph |
 | `inversion.py` | Inversion optimizer based on AdamW + cosine annealing learning rate scheduling (`run_inversion` class) |
-| `inversion_lbgfs.py` | Inversion optimizer based on L-BFGS + Strong-Wolfe line search. More memory-efficient |
 | `benchmark.py` | Regularization loss functions: Total Variation (TV), Tikhonov (L2), and joint TV+L2 |
 | `utils/data_trans.py` | Data transformation: log-normal encoding/decoding, Gaussian noise injection, random trace missing simulation, initial model generation |
 | `utils/data_vis.py` | Visualization helpers: plotting resistivity models and MT responses |
@@ -100,6 +99,6 @@ This project implements a **physics-driven deep learning inversion** approach. T
 2. **Forward Modeling**: De-normalize and feed into the MT forward solver to obtain predicted apparent resistivity and phase
 3. **Loss Computation**: Total loss = data misfit + λ × regularization (TV or Tikhonov)
 4. **Gradient Backpropagation**: Backpropagate through the full finite-difference solver to update the resistivity model
-5. **Iterative Refinement**: L-BFGS or AdamW optimizer progressively refines the model
+5. **Iterative Refinement**: AdamW optimizer progressively refines the model
 
 Since the forward solver is fully differentiable, gradients flow end-to-end from the data misfit all the way back to the resistivity model parameters — no surrogate network training required.

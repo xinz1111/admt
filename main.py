@@ -9,7 +9,7 @@ import os
 import torch.nn as nn
 import src.utils.pytorch_ssim as pytorch_ssim
 from src.MT_forwardSolver import MT2DFD1
-from src.inversion_lbgfs import run_inversion, Regularization_method
+from src.inversion import run_inversion, Regularization_method
 from src.utils import data_trans, data_vis
 from accelerate import Accelerator
 from torch.optim import Adam
@@ -117,8 +117,8 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--regularization", default='l2', help="Regularization type ('tv'/'l2')")
     parser.add_argument("--lr", type=float, default=0.05, help="Inversion optimizer learning rate")
-    parser.add_argument("--ts", type=int, default=200, help="Number of inversion iteration steps")
-    parser.add_argument("--sigma", type=float, default=9, help="Gaussian smoothing std for initial model")
+    parser.add_argument("--ts", type=int, default=1000, help="Number of inversion iteration steps")
+    parser.add_argument("--sigma", type=float, default=10, help="Gaussian smoothing std for initial model")
     parser.add_argument("--loss_type", type=str, default='l1', help="Loss function type ('l1'/'l2'/'ssim')")
     parser.add_argument("--noise_std", type=float, default=0, help="Gaussian noise std added to MT data")
     parser.add_argument("--missing_number", type=int, default=0, help="Number of missing MT stations")

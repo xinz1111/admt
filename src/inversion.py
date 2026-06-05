@@ -310,10 +310,10 @@ class run_inversion:
             log_info = f"Step {l+1}/{ts} | " + " | ".join([f"{k}: {v:.6f}" for k, v in postfix_dict.items()])
             pbar.write(log_info)
 
-            current_step = l + 1
-            save_interval = 20
-            if current_step % save_interval == 0:
-                mu_list.append(mu.detach().cpu().numpy())
+            # current_step = l + 1
+            # save_interval = 20
+            # if current_step % save_interval == 0:
+            #     mu_list.append(mu.detach().cpu().numpy())
 
         final_results = results_dict.get_results()
-        return final_results, mu_list, predicted_mt
+        return  mu, final_results,predicted_mt
