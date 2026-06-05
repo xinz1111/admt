@@ -1,4 +1,4 @@
-# RED-DiffEq: Differentiable MT Inversion Framework
+# ADMT: An Intelligent 2D Magnetotelluric Inversion Framework Based on Automatic Differentiation Workflow
 
 A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a differentiable finite-difference forward solver into an optimization loop, it achieves end-to-end resistivity model inversion without surrogate networks.
 
