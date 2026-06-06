@@ -130,7 +130,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     regularization_list = ['l2', 'tv']
-    noise_std_list = [0,5,10]
+    noise_std_list = [0,0.5,0.1]
     for reg in regularization_list:
         print(f"\n==================== Starting all experiments for regularization: {reg} ====================")
         for noise_std in noise_std_list:
