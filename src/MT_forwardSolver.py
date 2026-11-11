@@ -632,8 +632,7 @@ class MT2DFD1(nn.Module):
         rhote = zxy_abs_sq / (omega * self.miu)
 
         # Phase (pure real arithmetic, differentiable)
-        phste = torch.atan2(zxy_imag, zxy_real) * 180.0 / torch.pi
-
+        phste = -torch.atan2(zxy_imag, zxy_real) * 180.0 / torch.pi
         rhote.requires_grad_(exr.requires_grad)
         phste.requires_grad_(exr.requires_grad)
 
@@ -670,8 +669,7 @@ class MT2DFD1(nn.Module):
         rhotm = zyx_abs_sq / (omega * self.miu)
 
         # Phase (pure real arithmetic, differentiable)
-        phstm = torch.atan2(zyx_imag, zyx_real) * 180.0 / torch.pi
-
+        phstm = -torch.atan2(-zyx_imag, -zyx_real) * 180.0 / torch.pi
         rhotm.requires_grad_(hxr.requires_grad)
         phstm.requires_grad_(hxr.requires_grad)
 
