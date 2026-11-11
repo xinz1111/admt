@@ -1,4 +1,4 @@
-# ADMT: An Intelligent 2D Magnetotelluric Inversion Framework Based on Automatic Differentiation Workflow
+# ADMT: A Two-Dimensional Magnetotelluric Inversion Framework Based on Automatic Differentiation Workflow
 
 A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a differentiable finite-difference forward solver into an optimization loop, it achieves end-to-end resistivity model inversion without surrogate networks.
 
@@ -6,6 +6,8 @@ A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a dif
 
 ```
 ADMT-main/
+├── .vscode/
+│   └── settings.json              # VS Code workspace settings
 ├── main.py                        # Main entry point: builds the forward solver and runs inversions
 ├── requirements.txt               # Python dependencies
 ├── README.md                      # Project documentation
@@ -17,16 +19,19 @@ ADMT-main/
 │   ├── inversion.py               # Inversion loop (AdamW + cosine annealing) and regularization factory
 │   ├── MT_forwardSolver.py        # Differentiable 2D MT finite-difference forward solver
 │   ├── benchmark.py               # Regularization losses (TV, Tikhonov, joint TV+L2)
+│   ├── __pycache__/               # Python bytecode cache
 │   └── utils/                     # Utility modules
 │       ├── __init__.py
 │       ├── data_trans.py          # Data preprocessing: log normalization, noise, missing traces, initial models
 │       ├── data_vis.py            # Matplotlib visualization utilities
-│       └── pytorch_ssim.py        # SSIM structural similarity loss / metric
+│       ├── pytorch_ssim.py        # SSIM structural similarity loss / metric
+│       └── __pycache__/           # Python bytecode cache
 │
 └── dataset/                       # Datasets and test data
     ├── MT_Data/                   # Synthetic resistivity/conductivity model generation
     │   ├── gaussian_random_fields.py  # Gaussian random field generator
     │   ├── main_forward.ipynb     # Model generation + forward modeling notebook
+    │   ├── __pycache__/           # Python bytecode cache
     │   └── images/                # Model comparison figures (model_compare_000–004, PNG/EPS)
     └── Test_Data/                 # Test data for inversion
         ├── README.md
@@ -36,9 +41,19 @@ ADMT-main/
             └── obs_modelanddata_64_10_new.npz    # Dataset actually read by main.py
 ```
 
-`experiment/` is **not shipped with the repository**; it is created at runtime by `main.py` to store inversion results.
+The `__pycache__/` directories contain Python bytecode and can be safely deleted. `experiment/` is **not part of the source tree**; it is created at runtime by `main.py` to store inversion results.
 
 ## Directory Descriptions
+
+### Root Files
+
+| File | Description |
+|------|-------------|
+| `main.py` | Command-line entry point: builds the forward solver and runs inversions over `dataset/Test_Data/MT_Data_Test/*.npz` |
+| `requirements.txt` | Python dependencies |
+| `CHANGES_CN.txt` | Revision notes for this release (Chinese) |
+| `LICENSE` | License file |
+| `.vscode/settings.json` | VS Code workspace settings (uses conda as the default Python environment/package manager) |
 
 ### `src/` — Core Source Code
 
