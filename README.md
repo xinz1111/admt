@@ -133,8 +133,8 @@ Note on the current entry point: the `__main__` block sweeps `regularization ∈
 | Argument | Description | Default | Options |
 |----------|-------------|---------|---------|
 | `--regularization` | Regularization type | `l2` | `l2`, `tv`, `None` |
-| `--lr` | Learning rate | `0.05` | float |
-| `--ts` | Total optimization steps | `200` | int |
+| `--lr` | Learning rate | `0.005` | float |
+| `--ts` | Total optimization steps | `1000` | int |
 | `--sigma` | Gaussian smoothing std for the initial model | `10` | float |
 | `--loss_type` | Data misfit loss | `l1` | `l1`, `l2`, `Huber`, `ssim` |
 | `--noise_std` | Gaussian noise std added to MT data | `0` | float |
