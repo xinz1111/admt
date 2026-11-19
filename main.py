@@ -117,7 +117,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--regularization", default='l2', help="Regularization type ('tv'/'l2')")
     parser.add_argument("--lr", type=float, default=0.05, help="Inversion optimizer learning rate")
-    parser.add_argument("--ts", type=int, default=200, help="Number of inversion iteration steps")
+    parser.add_argument("--ts", type=int, default=1000, help="Number of inversion iteration steps")
     parser.add_argument("--sigma", type=float, default=10, help="Gaussian smoothing std for initial model")
     parser.add_argument("--loss_type", type=str, default='l1', help="Loss function type ('l1'/'l2'/'ssim')")
     parser.add_argument("--noise_std", type=float, default=0, help="Gaussian noise std added to MT data")
