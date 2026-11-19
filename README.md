@@ -116,8 +116,8 @@ Dependencies: `torch>=1.12.0`, `numpy>=1.21.0`, `scipy>=1.7.0`, `matplotlib>=3.5
 
 ```bash
 python main.py \
-    --lr 0.05 \
-    --ts 200 \
+    --lr 0.005 \
+    --ts 1000 \
     --loss_type l1 \
     --mode TETM \
     --reg_lambda 1 \
