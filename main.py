@@ -116,11 +116,11 @@ def main(regularization, lr, ts, sigma, loss_type, noise_std, initial_type, miss
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--regularization", default='l2', help="Regularization type ('tv'/'l2')")
-    parser.add_argument("--lr", type=float, default=0.05, help="Inversion optimizer learning rate")
+    parser.add_argument("--lr", type=float, default=0.005, help="Inversion optimizer learning rate")
     parser.add_argument("--ts", type=int, default=1000, help="Number of inversion iteration steps")
     parser.add_argument("--sigma", type=float, default=10, help="Gaussian smoothing std for initial model")
     parser.add_argument("--loss_type", type=str, default='l1', help="Loss function type ('l1'/'l2'/'ssim')")
-    parser.add_argument("--noise_std", type=float, default=0, help="Gaussian noise std added to MT data")
+    parser.add_argument("--noise_std", type=float, default=5, help="Gaussian noise std added to MT data")
     parser.add_argument("--missing_number", type=int, default=0, help="Number of missing MT stations")
     parser.add_argument("--initial_type", type=str, default='smoothed', help="Initial model type (e.g., 'smoothed')")
     parser.add_argument("--method", type=str, default='admt', help="Experiment method identifier")
@@ -130,26 +130,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     regularization_list = ['l2', 'tv']
-    noise_std_list = [0,5,10]
     for reg in regularization_list:
         print(f"\n==================== Starting all experiments for regularization: {reg} ====================")
-        for noise_std in noise_std_list:
-            print(f"\n---------- Running: regularization={reg}, noise_std={noise_std:.2f} ----------")
-            main(
-                regularization=reg,
-                lr=args.lr,
-                ts=args.ts,
-                sigma=args.sigma,
-                loss_type=args.loss_type,
-                noise_std=noise_std,
-                initial_type=args.initial_type,
-                missing_number=args.missing_number,
-                method=args.method,
-                reg_lambda=args.reg_lambda,
-                mode=args.mode,
-                freq_n=args.n_freq
-            )
-            print(f"---------- Completed: regularization={reg}, noise_std={noise_std:.2f} ----------")
+        main(
+            regularization=reg,
+            lr=args.lr,
+            ts=args.ts,
+            sigma=args.sigma,
+            loss_type=args.loss_type,
+            noise_std=args.noise_std,
+            initial_type=args.initial_type,
+            missing_number=args.missing_number,
+            method=args.method,
+            reg_lambda=args.reg_lambda,
+            mode=args.mode,
+            freq_n=args.n_freq
+        )
 
     print("\n==================== All experiment combinations completed ====================")
 

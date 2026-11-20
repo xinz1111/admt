@@ -235,7 +235,53 @@ def add_noise_to_mt(y, std):
         y_noisy = y + noise
         y = torch.tensor(y_noisy).float()
         return y
+def relative_mt_noise_array(
+    data, percent, seed=2026, phase_convention="raw"
+):
 
+    a = np.asarray(data, dtype=np.float64)
+
+    if a.ndim not in (3, 4) or a.shape[-3] != 4:
+        raise ValueError("Input must contain the four TE/TM response channels")
+    if not np.isfinite(percent) or percent < 0:
+        raise ValueError("percent must be a non-negative finite number; 5 means 5%")
+    if phase_convention not in ("raw", "paper"):
+        raise ValueError("phase_convention must be 'raw' or 'paper'")
+    if not np.isfinite(a).all():
+        raise ValueError("Please handle NaN/Inf in the observed data first")
+
+    paper_data = a.copy()
+    if phase_convention == "raw":
+        paper_data[..., 1, :, :] = -(
+            (a[..., 1, :, :] + 180) % 360 - 180
+        )
+        paper_data[..., 3, :, :] = -(
+            (a[..., 3, :, :] + 360) % 360 - 180
+        )
+
+    rng = np.random.default_rng(seed)
+    delta = (
+        (percent / 100.0)
+        * np.abs(paper_data)
+        * rng.standard_normal(a.shape)
+    )
+
+    if phase_convention == "raw":
+        delta[..., 1, :, :] *= -1
+        delta[..., 3, :, :] *= -1
+
+    return a + delta
+def add_noise_to_mt(
+    y, std, seed=2026, phase_convention="raw"
+):
+
+    noisy = relative_mt_noise_array(
+        y.detach().cpu().numpy(),
+        percent=std,
+        seed=seed,
+        phase_convention=phase_convention,
+    )
+    return torch.as_tensor(noisy, dtype=y.dtype, device=y.device)
 def prepare_initial_model(v_true, initial_type=None, sigma=None, linear_coeff=1.0):
     """
     Generate initial model from true MT model for inversion initialization.

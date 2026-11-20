@@ -1,21 +1,29 @@
 import torch
 
+
 def total_variation_loss(mu):
     """
-    Compute anisotropic total variation loss for a 4D tensor.
-
-    TV loss constrains the smoothness of tensors (images/model parameters) by penalizing
-    sharp pixel/value variations. The anisotropic version uses L1 norm (absolute value)
-    for horizontal and vertical gradients, commonly used for image denoising and regularization.
-
+    R_TV(m) = (1/N) * sum_{i,j} sqrt( (m_{i+1,j}-m_{i,j})^2 + (m_{i,j+1}-m_{i,j})^2 )
+    
     Args:
-        mu (torch.Tensor): Input 4D tensor of shape [batch, channels, height, width]
+        mu (torch.Tensor): Input 4D tensor [batch, channels, height, width]
     Returns:
-        torch.Tensor: Scalar total variation loss value
+        torch.Tensor: Scalar isotropic TV loss
     """
-    diff_x = torch.abs(mu[:, :, :, 1:] - mu[:, :, :, :-1])
-    diff_y = torch.abs(mu[:, :, 1:, :] - mu[:, :, :-1, :])
-    tv_loss = torch.mean(diff_x) + torch.mean(diff_y)
+    # vertical diff: m_{i+1,j} - m_{i,j}  (along height dim, dim=-2)
+    diff_y = mu[:, :, 1:, :] - mu[:, :, :-1, :]
+    # horizontal diff: m_{i,j+1} - m_{i,j} (along width dim, dim=-1)
+    diff_x = mu[:, :, :, 1:] - mu[:, :, :, :-1]
+
+    # Note: diff_x and diff_y have different shapes, so crop them to the same size.
+    # diff_y: [B, C, H-1, W]
+    # diff_x: [B, C, H, W-1]
+    # Both cropped to [B, C, H-1, W-1]
+    diff_y = diff_y[:, :, :, :-1]
+    diff_x = diff_x[:, :, :-1, :]
+
+    grad_norm = torch.sqrt(diff_y ** 2 + diff_x ** 2 + 1e-8)  # +eps prevents gradient explosion at sqrt(0)
+    tv_loss = torch.mean(grad_norm)
     return tv_loss
 
 def tikhonov_loss(mu):

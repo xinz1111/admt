@@ -265,7 +265,12 @@ class run_inversion:
         results_dict = ResultsDict(self.data_trans, self.ssim_loss, loss_type, self.regularization_method, reg_lambda)
 
         # MT data preprocessing: simulate real-world noise and missing traces
-        y = self.data_trans.add_noise_to_mt(y, noise_std)
+        # y = self.data_trans.add_noise_to_mt(y, noise_std)
+        y = self.data_trans.add_noise_to_mt(
+                                                y,
+                                                std=noise_std,
+                                                phase_convention="raw",
+                                            )
         y = self.data_trans.missing_trace(y, missing_number)
         y = y.to(self.device)
 

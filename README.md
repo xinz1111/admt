@@ -5,17 +5,16 @@ A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a dif
 ## Project Structure
 
 ```
-├── main_admt_complex_medium.py   # Main entry point: run MT inversion experiments
-├── Visualization_models.ipynb    # Jupyter Notebook: visualize and compare inversion results
+├── main.py                       # Main entry point: run MT inversion experiments
 ├── requirements.txt              # Python dependencies
 ├── README.md                     # Project documentation
+├── LICENSE                       # License file
 │
 ├── src/                          # Core source code
 │   ├── __init__.py
 │   ├── inversion.py              # Inversion with AdamW + cosine annealing scheduler
-│   ├── inversion_lbgfs.py        # Inversion with L-BFGS optimizer (currently active)
 │   ├── MT_forwardSolver.py       # Differentiable 2D MT finite-difference forward solver
-│   ├── benchmark.py              # Regularization losses (TV, Tikhonov)
+│   ├── benchmark.py              # Regularization losses (TV, Tikhonov, joint TV+L2)
 │   └── utils/                    # Utility modules
 │       ├── __init__.py
 │       ├── data_trans.py         # Data preprocessing: normalization, noise, missing traces
@@ -28,10 +27,12 @@ A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a dif
 │   │   ├── main_forward.ipynb    # Forward modeling notebook
 │   │   └── images/               # Model comparison figures (PNG/EPS)
 │   └── Test_Data/                # Test data for inversion
-│       └── MT_Data_Test/         # .npz files (observed data + true models)
+│       └── MT_Data_Test/         # .npz file (observed data + true models)
 │
-└── experiment/                   # Experiment output
-    └── complex/                  # Results on complex models (timestamped subdirectories)
+└── experiment/                   # Experiment output (created at runtime)
+    └── <run_tag>/                # One directory per run, named by hyperparameters
+        └── <npz_name>/           # One subdirectory per test-data file
+            └── <sample>_results.pkl  # Pickled results for one sample
 ```
 
 ## Directory Descriptions
@@ -52,13 +53,14 @@ A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a dif
 | Subdirectory | Description |
 |--------------|-------------|
 | `MT_Data/` | Synthetic data generation. `gaussian_random_fields.py` generates synthetic resistivity models via Gaussian random fields; `images/` stores generated comparison figures |
-| `Test_Data/` | Inversion test data. `MT_Data_Test/` contains `.npz` files with observed MT data and corresponding true resistivity models |
+| `Test_Data/` | Inversion test data. `MT_Data_Test/obs_modelanddata_64_10_new.npz` contains observed MT data (`obs_data`) and the corresponding true resistivity models (`sig_model`). `main.py` currently inverts the sample at index `7` |
 
 ### `experiment/` — Experiment Results
 
 | Subdirectory | Description |
 |--------------|-------------|
-| `complex/` | Results for complex geological models. Each run creates a timestamped subdirectory containing recovered resistivity models and optimization metrics (pickle format) |
+| `<run_tag>/` | One directory per run, named `{mode}_{reg}_lr{lr}_ts{ts}_sigma{sigma}_loss{loss}_noisestd{noise_std}_missing{missing}` (e.g. `TETM_l2_lr0.005_ts1000_sigma10_lossl1_noisestd5_missing0`) |
+| `<npz_name>/<sample>_results.pkl` | Pickled results for one sample, containing `mu` (recovered resistivity model), `final_results` (per-step loss/metric history), and `predicted_mt` (predicted MT response) |
 
 ## Installation
 
@@ -69,36 +71,42 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python main_admt_complex_medium.py \
-    --regularization tv \
-    --lr 0.001 \
-    --ts 200 \
+python main.py \
+    --lr 0.005 \
+    --ts 1000 \
     --loss_type l2 \
     --noise_std 0.1 \
     --mode TETM \
     --reg_lambda 0.01
 ```
 
+> **Note:** `main.py` currently runs both `l2` and `tv` regularization sequentially in a single invocation (see the `regularization_list` loop). The `--regularization` flag is accepted for backward compatibility but does not select the run.
+
 ### Key Arguments
 
-| Argument | Description | Options |
+| Argument | Description | Default |
 |----------|-------------|---------|
-| `--regularization` | Regularization type | `l2`, `tv`, `None` |
-| `--lr` | Learning rate | float |
-| `--ts` | Total optimization steps | int |
-| `--loss_type` | Data misfit loss | `l1`, `l2`, `Huber`, `ssim` |
-| `--noise_std` | MT data noise standard deviation | float |
-| `--mode` | MT forward modeling mode | `TE`, `TM`, `TETM` |
-| `--reg_lambda` | Regularization weight | float |
+| `--regularization` | Regularization type placeholder (accepted but **not used**; `l2` and `tv` are both run) | `l2` |
+| `--lr` | Learning rate for the AdamW optimizer | `0.005` |
+| `--ts` | Total optimization steps | `1000` |
+| `--sigma` | Gaussian smoothing std for the initial model | `10` |
+| `--loss_type` | Data misfit loss: `l1`, `l2`, `Huber`, `ssim` | `l1` |
+| `--noise_std` | Gaussian noise std added to MT data | `5` |
+| `--missing_number` | Number of missing MT traces | `0` |
+| `--initial_type` | Initial model type (accepted but **not used**; `smoothed` is hardcoded) | `smoothed` |
+| `--method` | Experiment method identifier (accepted but **not used**) | `admt` |
+| `--reg_lambda` | Regularization weight coefficient | `1` |
+| `--mode` | MT forward modeling mode: `TE`, `TM`, `TETM` | `TETM` |
+| `--n_freq` | Number of frequency points used | `16` |
 
 ## Method Overview
 
 This project implements a **physics-driven deep learning inversion** approach. The key idea is embedding a fully differentiable MT finite-difference forward solver (`MT2DFD1`) into a PyTorch optimization loop:
 
-1. **Model Initialization**: Log-normalize the initial resistivity model to [-1, 1]
-2. **Forward Modeling**: De-normalize and feed into the MT forward solver to obtain predicted apparent resistivity and phase
+1. **Model Initialization**: Convert the resistivity model to conductivity (`1/ρ`), apply log-normalization, and rescale it to `[-1, 1]`
+2. **Forward Modeling**: De-normalize the model and feed it into the MT forward solver to obtain predicted apparent resistivity and phase
 3. **Loss Computation**: Total loss = data misfit + λ × regularization (TV or Tikhonov)
-4. **Gradient Backpropagation**: Backpropagate through the full finite-difference solver to update the resistivity model
-5. **Iterative Refinement**: AdamW optimizer progressively refines the model
+4. **Gradient Backpropagation**: Backpropagate through the full finite-difference solver to update the model
+5. **Iterative Refinement**: AdamW (`weight_decay=1e-2`) with a cosine-annealing learning-rate scheduler progressively refines the model
 
 Since the forward solver is fully differentiable, gradients flow end-to-end from the data misfit all the way back to the resistivity model parameters — no surrogate network training required.
