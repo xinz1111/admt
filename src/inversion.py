@@ -236,8 +236,9 @@ class run_inversion:
             missing_number: Number of missing MT traces (default 0, no missing)
             regularization: Override regularization type (takes priority over init value)
         Returns:
-            mu: Optimized resistivity model tensor
-            final_results: Dictionary of all loss and metric values during optimization
+            mu: Optimized normalized log-resistivity tensor
+            final_results: Per-step histories and the separately evaluated final_state
+            predicted_mt: Forward response of the returned final model
         """
         assert mode in ["TE", "TM", "TETM"], "Forward mode must be 'TE'/'TM'/'TETM'"
         assert mu.shape[0] == y.shape[0], "Resistivity model batch size must match MT data batch size"
@@ -321,4 +322,22 @@ class run_inversion:
             #     mu_list.append(mu.detach().cpu().numpy())
 
         final_results = results_dict.get_results()
-        return  mu, final_results,predicted_mt
+        # After the last update and model clamping, run one extra forward pass so the
+        # returned response matches the returned final model. History lists keep their
+        # pre-update records; the final loss is stored separately to avoid confusion
+        # with iteration indices.
+        with torch.no_grad():
+            final_sigma = self.data_trans.log_normalize_decode(mu[0, 0, ...], self.max_log)
+            predicted_mt = fwi_forward(final_sigma).detach()
+            final_obs = results_dict.calcualte_mt_loss(predicted_mt, y, loss_type, mode, freq_n)
+            final_reg = results_dict.calcualte_raw_reg_loss(mu, reg_lambda)
+            final_total = results_dict.calcualte_total_loss(final_obs, final_reg, reg_lambda)
+        final_results['final_state'] = {
+            'iteration': ts,
+            'obs_loss': final_obs.item(),
+            'reg_loss': final_reg.item(),
+            'total_loss': final_total.item(),
+            'normalization_max_log': self.max_log.item(),
+            'model_representation': 'normalized_log10_resistivity',
+        }
+        return mu, final_results, predicted_mt
