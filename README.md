@@ -1,4 +1,4 @@
-# ADMT: A Two-Dimensional Magnetotelluric Inversion Framework Based on Automatic Differentiation of a Primary–Secondary Field Formulation
+# ADMT: A Two-Dimensional Magnetotelluric Inversion Framework Based on a Differentiable  Primary–Secondary Field Formulation 
 
 A physics-driven 2D magnetotelluric (MT) inversion framework. By embedding a differentiable finite-difference forward solver into an optimization loop, it achieves end-to-end resistivity model inversion without surrogate networks.
 
