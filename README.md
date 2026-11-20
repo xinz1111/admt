@@ -11,7 +11,6 @@ ADMT-main/
 ├── main.py                        # Main entry point: builds the forward solver and runs inversions
 ├── requirements.txt               # Python dependencies
 ├── README.md                      # Project documentation
-├── CHANGES_CN.txt                 # Revision notes for this release (Chinese)
 ├── LICENSE                        # License file
 ├── .gitignore                     # Git ignore rules (Python caches, OS files)
 │
@@ -49,7 +48,6 @@ Python bytecode caches (`__pycache__/`, `*.pyc`) are excluded via `.gitignore` a
 |------|-------------|
 | `main.py` | Command-line entry point: builds the forward solver and runs inversions over `dataset/Test_Data/MT_Data_Test/*.npz` |
 | `requirements.txt` | Python dependencies |
-| `CHANGES_CN.txt` | Revision notes for this release (Chinese) |
 | `LICENSE` | License file |
 | `.gitignore` | Git ignore rules (Python caches, OS files) |
 | `.vscode/settings.json` | VS Code workspace settings (uses conda as the default Python environment/package manager) |
@@ -157,7 +155,3 @@ This project implements a **physics-driven deep learning inversion** approach. T
 5. **Iterative Refinement**: AdamW with cosine annealing progressively refines the model; a final forward pass recomputes the response of the returned model
 
 Since the forward solver is fully differentiable, gradients flow end-to-end from the data misfit all the way back to the model parameters — no surrogate network training required.
-
-## Revision Notes
-
-See `CHANGES_CN.txt` for the changes in this release, including the final forward pass, the final-state loss record, and the corresponding paper revisions.
